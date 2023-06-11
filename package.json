@@ -1,0 +1,15 @@
+{
+  "name": "hours",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "hours"
+  },
+  "author": "Shedrick Williams",
+  "license": "ISC",
+  "dependencies": {
+    "date": "2.0.2",
+    "mongodb": "5.5"
+  }
+}
