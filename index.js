@@ -1,17 +1,36 @@
 //const Date = require("date");
 const mongo = require("mongodb");
 const convertTime = require("convert-time");
-const date = new Date();
 const readline = require("readline");
+const {connected} = require("process");
+
+const date = new Date();
 const month = date.getMonth() + 1;
 const day = date.getDate();
 const year = date.getFullYear();
 
-//going to remove seconds and instead convert all times to time in minutes and subtract
-//to find a singular runtimeMinutes which will be converted back into the hours/minutes format
-// and stored into the runtime member
+const uri = "mongodb+srv://lilshed3:9168689565@cluster0.jpmmpcc.mongodb.net/?retryWrites=true&w=majority";
+const client = new mongo.MongoClient("mongodb+srv://lilshed3:9168689565@cluster0.jpmmpcc.mongodb.net/?retryWrites=true&w=majority");
+let globalCollPlaceholder = null;
 
 readline.emitKeypressEvents(process.stdin);
+
+async function connectDB() {
+    await client.connect();
+    const db = client.db("hoursCounter");
+    globalCollPlaceholder = db.collection("logs");
+    console.log("Connected!");
+}
+
+async function dbQuery(docs) {
+    await globalCollPlaceholder.insertMany(docs);
+    console.log("Data logged!");
+}
+
+async function disconnectDB() {
+    await client.close();
+    console.log("Disconnected");   
+}
 
 class Time {
     constructor() {
@@ -27,8 +46,8 @@ class Time {
         this.endMinutes = null;
         //this.endSeconds = null;
 
-        this.runtimeHours = null;
-        this.runtimeMinutes = null;
+        //this.runtimeHours = null;
+        //this.runtimeMinutes = null;
         //this.runtimeSeconds = null;
         
         this.runtime = null;
@@ -42,56 +61,72 @@ class Time {
     updateTime() {
         const date = new Date();
         //this.hours = date.getHours();
-        this.hours = () => {
-            if (date.getHours() < 12) {
-                return date.getHours();
-            } else if (date.getHours > 12) {
-                return date.getHours - 12;
-            }
+        if (date.getHours() < 12) {
+            this.hours = date.getHours();
+        } else if (date.getHours() > 12) {
+            this.hours = date.getHours() - 12;
         }
         this.minutes = date.getMinutes();
-        //this.seconds = date.getSeconds();
-        //this.operationalTime = Number(`${this.hours}${this.minutes}${this.seconds}`);
     }
 
     convertToMinutes(hours, minutes) {
-        hoursInMinutes = hours * 60;
+        let hoursInMinutes = hours * 60;
         return  hoursInMinutes + minutes;
     }
 
-    calculateTimeDifference(start, finish, runtimeHolder) {
+    calculateTimeDifference(start, finish) {
         const minutesAt12 = 720;
-        start = this.convertToMinutes(start.startHours, start.startMinutes);
-        finish = this.convertToMinutes(finish.endHours, finish.endMinutes);
+        let [startHours, startMinutes] = start;
+        let [endHours, endMinutes] = finish;
+        let startTime = this.convertToMinutes(startHours, startMinutes);
+        let finishTime = this.convertToMinutes(endHours, endMinutes);
         
-        if (start > finish) {
+        if (startTime > finishTime) {
             //720 is the number of minutes at 12:00
-            start = 720 - start;
-            runtimeHolder = start + finish;
-        } else if (start < finish) {
-            runtimeHolder = start - finish;
+            startTime = 780 - startTime;
+            this.runtime = startTime + finishTime;
+        } else if (startTime < finishTime) {
+            this.runtime = finishTime - startTime;
         }
-        
+    }
+    
+    display(i) {
+        if(this.startMinutes < 10 && i == 0) {
+            console.log("Start time: " +  `${this.startHours}:` + "0" + `${this.startMinutes}`);
+        } else if (this.endMinutes < 10 && i == 1) {
+            console.log("End time: " +  `${this.endHours}:` + "0" + `${this.endMinutes}`);
+        } 
     }
 
     getTime() {
 
         if(this.i == 0) {
-
             this.startHours = this.hours;
             this.startMinutes = this.minutes;
             //this.startSeconds = this.seconds;
-            console.log("Start time: " +  convertTime(`${this.startHours}:${this.startMinutes}`));
+            //this.display(this.i);
+            //console.log("Start time: " +  `${this.startHours}:` + "0" + `${this.startMinutes}`);
+            if(this.startMinutes < 10 && this.i == 0) {
+                console.log("Start time: " +  `${this.startHours}:` + "0" + `${this.startMinutes}`);
+            } else {
+                console.log("Start time: " + `${this.startHours}:${this.startMinutes}`);
+            }
 
         } else if(this.i == 1) {
 
             this.endHours = this.hours;
             this.endMinutes = this.minutes;
             //this.endSeconds = this.seconds;
+            
+            if(this.endMinutes < 10 && i == 0) {
+                console.log("End time: " +  `${this.endHours}:` + "0" + `${this.endMinutes}`);
+            } else {
+                console.log("End time: " + `${this.endHours}:${this.endMinutes}`);
+            }
 
-            //this.runtime = `${this.runtimeHours}:${this.runtimeMinutes}`;
-            console.log("End time : " +  convertTime(`${this.endHours}:${this.endMinutes}`));
-            console.log(`Total Runtime: ${this.calculateTimeDifference((this.startHours, this.startMinutes),(this.endHours, this.endMinutes), this.runtime)}`);
+            //this.display(this.i);
+            this.calculateTimeDifference([this.startHours, this.startMinutes], [this.endHours, this.endMinutes]); 
+            console.log("Total Runtime: " + `${this.runtime} Minute(s)`);
 
         } else {
             console.log("Time already logged.");
@@ -99,22 +134,21 @@ class Time {
         }
 
         this.i++;
-        //return `${this.hours}:${this.minutes}:${this.seconds}`;
     }
-
-
-
 }
 
-var time = new Time();
+const time = new Time();
+connectDB();
 
 time.updateTime();
 time.getTime();
 
-process.stdin.on('keypress', (chunk, key) => {
+process.stdin.on('keypress', async (chunk, key) => {
     if(key && key.name == 'l') {
         time.updateTime();
         time.getTime();
-        //time.calculateTimeDifference((time.startHours, time.startMinutes), (time.endHours, time.endMinutes));
+        await dbQuery([{runtime: time.runtime, month: month, day: day, year: year}]);
+        disconnectDB();
     }
 });
+

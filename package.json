@@ -9,6 +9,7 @@
   "author": "Shedrick Williams",
   "license": "ISC",
   "dependencies": {
+    "convert-time": "^0.3.0",
     "date": "2.0.2",
     "mongodb": "5.5"
   }
