@@ -118,7 +118,7 @@ class Time {
             this.endMinutes = this.minutes;
             //this.endSeconds = this.seconds;
             
-            if(this.endMinutes < 10 && i == 0) {
+            if(this.endMinutes < 10 && this.i == 0) {
                 console.log("End time: " +  `${this.endHours}:` + "0" + `${this.endMinutes}`);
             } else {
                 console.log("End time: " + `${this.endHours}:${this.endMinutes}`);
