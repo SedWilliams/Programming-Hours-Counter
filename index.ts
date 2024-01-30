@@ -1,7 +1,9 @@
-
 //TO-DO:
 //    -Add type annotations
-//    -
+//    -Add error handling in case of failure
+//    -Create a DB handling class, with connectDB method ommited
+//    -create type definitions for Time class
+//    -create interface for Time class
 
 //const Date = require("date");
 const mongo = require("mongodb");
@@ -37,30 +39,44 @@ async function disconnectDB() {
     console.log("Disconnected");   
 }
 
+interface Time {
+
+}
+
 class Time {
+    
+    //This is used as a counter for getTime()
+    //getTime is run each time a user sends input (startup and end)
+    //when the counter is = 2, a third request will not be able to be made
+    private i: Number = 0;
+    
+    //variables holding calculations for runtime
+    private startHours: Number = 0;
+    private startMinutes: Number = 0;
+    private endHours: Number = 0;
+    private endMinutes: Number = 0;
+    
+    //storage for total runtime
+    private runtime: Number = 0;
+    
+    //holds queries from date class
+    private hours: Number = 0;
+    private minutes: Number = 0 ;
+
     constructor() {
-        //counter for getTime(), can only be run twice to prevent logging more data
+
         this.i = 0;
 
-        //variables holding calculations for runtime
-        this.startHours = null;
-        this.startMinutes = null;
-        //this.startSeconds = null;
+        this.startHours = 0;
+        this.startMinutes = 0;
 
-        this.endHours = null;
-        this.endMinutes = null;
-        //this.endSeconds = null;
+        this.endHours = 0;
+        this.endMinutes = 0;
 
-        //this.runtimeHours = null;
-        //this.runtimeMinutes = null;
-        //this.runtimeSeconds = null;
-        
-        this.runtime = null;
+        this.runtime = 0;
 
-        //date/time info
-        this.hours = null;
-        this.minutes = null;
-        //this.seconds = null;
+        this.hours = 0;
+        this.minutes = 0;
     }
 
     updateTime() {
@@ -82,7 +98,7 @@ class Time {
         return  hoursInMinutes + minutes;
     }
 
-    calculateTimeDifference(start, finish) {
+    calculateTimeDifference(start: Number, finish: Number) {
         const minutesAt12 = 720;
         let [startHours, startMinutes] = start;
         let [endHours, endMinutes] = finish;
