@@ -1,3 +1,8 @@
+
+//TO-DO:
+//    -Add type annotations
+//    -
+
 //const Date = require("date");
 const mongo = require("mongodb");
 const convertTime = require("convert-time");
@@ -64,11 +69,14 @@ class Time {
         if (date.getHours() < 12) {
             this.hours = date.getHours();
         } else if (date.getHours() > 12) {
+            //This is to account for date class returning time
+            //in a 24 hour format
             this.hours = date.getHours() - 12;
         }
         this.minutes = date.getMinutes();
     }
 
+    //globalize function since it is utility
     convertToMinutes(hours, minutes) {
         let hoursInMinutes = hours * 60;
         return  hoursInMinutes + minutes;
