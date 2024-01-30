@@ -138,10 +138,11 @@ class Time {
 }
 
 const time = new Time();
-connectDB();
 
 time.updateTime();
 time.getTime();
+connectDB();
+
 
 process.stdin.on('keypress', async (chunk, key) => {
     if(key && key.name == 'l') {
