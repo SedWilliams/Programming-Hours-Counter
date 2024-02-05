@@ -2,8 +2,8 @@
 //    -Add type annotations
 //    -Add error handling in case of failure
 //    -Create a DB handling class, with connectDB method ommited
-//    -create type definitions for Time class
-//    -create interface for Time class
+//    -create type definitions for Time class (DONE)
+//    -create interface for Time class (DONE)
 
 //const Date = require("date");
 const mongo = require("mongodb");
@@ -40,7 +40,27 @@ async function disconnectDB() {
 }
 
 interface Time {
+    private i: Number;
+    
+    //variables holding calculations for runtime
+    private startHours: Number;
+    private startMinutes: Number;
+    private endHours: Number;
+    private endMinutes: Number;
+    
+    //storage for total runtime
+    private runtime: Number;
+    
+    //holds queries from date class
+    private hours: Number;
+    private minutes: Number;
 
+    public updateTime(): void;
+    private convertToMinutes(): void;
+    private calculateTimeDifference(): void;
+    private display(): void;
+    public getTime(): void;
+    
 }
 
 class Time {
@@ -61,7 +81,7 @@ class Time {
     
     //holds queries from date class
     private hours: Number = 0;
-    private minutes: Number = 0 ;
+    private minutes: Number = 0;
 
     constructor() {
 
