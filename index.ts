@@ -5,7 +5,6 @@
 //    -create type definitions for Time class (DONE)
 //    -create interface for Time class (DONE)
 
-//const Date = require("date");
 const mongo = require("mongodb");
 const convertTime = require("convert-time");
 const readline = require("readline");
